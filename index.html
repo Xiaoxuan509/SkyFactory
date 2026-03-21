@@ -83,7 +83,7 @@
         // 注意：這在 Radmin 環境下非常依賴瀏覽器的逾時判斷
         const img = new Image();
         const startTime = new Date().getTime();
-        img.src = "http://26.21.159.20:25565"; 
+        img.src = "http://26.21.159.20:25565/?" + Math.random();
 
         const timer = setTimeout(() => {
             label.innerText = "OFFLINE (關閉中)";
