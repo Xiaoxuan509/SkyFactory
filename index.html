@@ -3,103 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyFactory 4 伺服器狀態</title>
+    <title>SF4 樹苗資源清單</title>
     <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent: #00ff9d;
+            --text: #e0e0e0;
+            --secondary: #4a4a4a;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
             margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .card {
-            background-color: #2d2d2d;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+        .header {
             text-align: center;
-            width: 350px;
-            border: 1px solid #404040;
+            margin-bottom: 30px;
         }
-        h2 { color: #00ff9d; margin-bottom: 0.5rem; }
-        .ip-box {
-            background: #111;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            margin: 15px 0;
-            color: #aaa;
-        }
-        #status-indicator {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-            background-color: #555;
-        }
-        .status-text { font-size: 1.2rem; font-weight: bold; margin: 20px 0; }
-        button {
-            background-color: #00ff9d;
-            color: #000;
-            border: none;
-            padding: 12px 25px;
+        .header h1 { color: var(--accent); margin-bottom: 5px; }
+        
+        /* 搜尋框 */
+        #searchBar {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 20px;
             border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
+            border: 1px solid var(--secondary);
+            background: var(--card-bg);
+            color: white;
+            box-sizing: border-box;
+            outline: none;
         }
-        button:hover { background-color: #00cc7e; transform: scale(1.05); }
-        .footer { font-size: 0.8rem; color: #666; margin-top: 20px; }
+        #searchBar:focus { border-color: var(--accent); }
+
+        /* 清單樣式 */
+        .sapling-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .sapling-item {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+            border-left: 4px solid var(--secondary);
+        }
+        .sapling-item:hover {
+            transform: translateX(5px);
+            background: #252525;
+            border-left-color: var(--accent);
+        }
+        .eng-name { font-weight: bold; color: #fff; }
+        .chi-name { color: #888; font-size: 0.9rem; }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        /* 隱藏不符合搜尋條件的項目 */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Sky Factory</h2>
-    <p>伺服器</p>
-    <div class="status-text">
-        <span id="status-indicator"></span>
-        <span id="status-label">等待檢查...</span>
+<div class="container">
+    <div class="header">
+        <h1>SkyFactory 4</h1>
+        <p>自動化資源樹苗清單</p>
     </div>
 
-    <button onclick="checkServer()">重新整理狀態</button>
-    
-    <div class="footer">注意：需先連線 Radmin VPN 才能正確偵測</div>
+    <input type="text" id="searchBar" placeholder="搜尋樹苗名稱 (中文或英文)..." onkeyup="filterList()">
+
+    <div class="sapling-list" id="saplingList">
+        </div>
 </div>
 
 <script>
-    function checkServer() {
-        const indicator = document.getElementById('status-indicator');
-        const label = document.getElementById('status-label');
-        
-        label.innerText = "偵測中...";
-        indicator.style.background = "#ffff00"; // 黃色表示檢查中
+    const saplings = [
+        ["Dirt Sapling", "泥土樹苗"], ["Petrified Sapling", "石化樹苗"],
+        ["Clay Sapling", "黏土樹苗"], ["Bone Sapling", "骨頭樹苗"],
+        ["Gravel Sapling", "礫石樹苗"], ["Sand Sapling", "沙子樹苗"],
+        ["Coal Sapling", "煤炭樹苗"], ["Cottonwood Sapling", "棉木樹苗"],
+        ["Iron Sapling", "鐵樹苗"], ["Tin Sapling", "錫樹苗"],
+        ["Lead Sapling", "鉛樹苗"], ["Nickel Sapling", "鎳樹苗"],
+        ["Gold Sapling", "金樹苗"], ["Redstone Sapling", "紅石樹苗"],
+        ["Lapis Sapling", "青金石樹苗"], ["Copper Sapling", "銅樹苗"],
+        ["Silver Sapling", "銀樹苗"], ["Diamond Sapling", "鑽石樹苗"],
+        ["Emerald Sapling", "綠寶石樹苗"], ["Quartz Sapling", "石英樹苗"],
+        ["Netherrack Sapling", "地獄石樹苗"], ["Glowstone Sapling", "螢石樹苗"]
+    ];
 
-        // 這裡一樣利用圖片載入 Port 25565 的技巧
-        // 注意：這在 Radmin 環境下非常依賴瀏覽器的逾時判斷
-        const img = new Image();
-        const startTime = new Date().getTime();
-        img.src = "http://26.21.159.20:25565/?" + Math.random();
+    const listContainer = document.getElementById('saplingList');
 
-        const timer = setTimeout(() => {
-            label.innerText = "OFFLINE (關閉中)";
-            label.style.color = "#ff4d4d";
-            indicator.style.background = "#ff4d4d";
-        }, 2500);
+    // 初始化清單
+    saplings.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'sapling-item';
+        div.innerHTML = `
+            <div>
+                <div class="eng-name">${s[0]}</div>
+                <div class="chi-name">${s[1]}</div>
+            </div>
+            <div class="status-dot"></div>
+        `;
+        listContainer.appendChild(div);
+    });
 
-        img.onerror = () => {
-            clearTimeout(timer);
-            label.innerText = "ONLINE (運作中)";
-            label.style.color = "#00ff9d";
-            indicator.style.background = "#00ff9d";
-        };
+    // 搜尋功能
+    function filterList() {
+        const input = document.getElementById('searchBar').value.toLowerCase();
+        const items = document.getElementsByClassName('sapling-item');
+
+        Array.from(items).forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if (text.includes(input)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
     }
-    // 網頁開啟自動執行一次
-    window.onload = checkServer;
 </script>
 
 </body>
