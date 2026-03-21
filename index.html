@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyFactory 4 伺服器狀態</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: #2d2d2d;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 350px;
+            border: 1px solid #404040;
+        }
+        h2 { color: #00ff9d; margin-bottom: 0.5rem; }
+        .ip-box {
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 15px 0;
+            color: #aaa;
+        }
+        #status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            background-color: #555;
+        }
+        .status-text { font-size: 1.2rem; font-weight: bold; margin: 20px 0; }
+        button {
+            background-color: #00ff9d;
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #00cc7e; transform: scale(1.05); }
+        .footer { font-size: 0.8rem; color: #666; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Sky Factory</h2>
+    <p>伺服器</p>
+    <div class="status-text">
+        <span id="status-indicator"></span>
+        <span id="status-label">等待檢查...</span>
+    </div>
+
+    <button onclick="checkServer()">重新整理狀態</button>
+    
+    <div class="footer">注意：需先連線 Radmin VPN 才能正確偵測</div>
+</div>
+
+<script>
+    function checkServer() {
+        const indicator = document.getElementById('status-indicator');
+        const label = document.getElementById('status-label');
+        
+        label.innerText = "偵測中...";
+        indicator.style.background = "#ffff00"; // 黃色表示檢查中
+
+        // 這裡一樣利用圖片載入 Port 25565 的技巧
+        // 注意：這在 Radmin 環境下非常依賴瀏覽器的逾時判斷
+        const img = new Image();
+        const startTime = new Date().getTime();
+        img.src = "http://你的RadminIP:25565"; 
+
+        const timer = setTimeout(() => {
+            label.innerText = "OFFLINE (關閉中)";
+            label.style.color = "#ff4d4d";
+            indicator.style.background = "#ff4d4d";
+        }, 2500);
+
+        img.onerror = () => {
+            clearTimeout(timer);
+            label.innerText = "ONLINE (運作中)";
+            label.style.color = "#00ff9d";
+            indicator.style.background = "#00ff9d";
+        };
+    }
+    // 網頁開啟自動執行一次
+    window.onload = checkServer;
+</script>
+
+</body>
+</html>
